@@ -53,7 +53,7 @@ In this folder, you should find the video **Error_Handling_in_Python**. Watch it
 
 ---
 
-#### try/except
+#### try/except/finally
 
 In Python, `try`, `except` and `finally` are the core mechanisms Python uses to handle errors. They function similarly to `if/else` statements.
 
@@ -107,7 +107,7 @@ except Exception:  # Too broad; catches everything
 
 ---
 
-#### The Exception Hierarchy
+##### The Exception Hierarchy
 
 Python exceptions are organised in a class hierarchy. Most runtime errors inherit from the base class `Exception`. The simplified structure is as follows:
 
@@ -215,11 +215,25 @@ Logging is the practice of writing structured messages about what your program i
 - **Persistence**: Write to a file for later inspection or auditing
 - **Context**: Include timestamps, module names, and severity automatically
 
-### Basic usage
+### Logging in Python
 
-Use the standard library `logging` module and prefer logging functions over `print` for operational messages.
+#### Introduction
 
-**✓ Good:**
+In this folder, you will find the video `Logging_in_Python.mp4`. Watch it for an introduction to logging information in Python.
+
+---
+
+#### Basic Usage
+
+Logging is implemented using Python's standard library `logging` module. Instead of using `print()` statements, you use logging functions to record events at different severity levels.
+
+**✗ Bad (using print):**
+```python
+print("Starting processing.")   # No levels, no timestamps, hard to redirect
+print("Something went wrong!")
+```
+
+**✓ Good (using logging):**
 ```python
 import logging
 
@@ -227,35 +241,163 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 logger.info("Starting processing.")
-logger.warning("Low disk space.")
-logger.error("Failed to connect to server.")
+logger.error("Something went wrong!")
 ```
+
+---
+
+#### Logging Levels
+
+Python's logging module provides **five standard severity levels** that allow you to control verbosity without modifying code:
+
+| Level | Numeric Value | Typical Use |
+|-------|---------------|------------|
+| DEBUG | 10 | Detailed diagnostic information for developers |
+| INFO | 20 | General informational messages about program progress |
+| WARNING | 30 | Warning messages for potentially problematic situations (default) |
+| ERROR | 40 | Error messages for serious problems that need attention |
+| CRITICAL | 50 | Critical errors that may cause program termination |
+
+When you set a logging level, all messages at that level and above are recorded. For example, setting level to `WARNING` will log WARNING, ERROR, and CRITICAL messages, but not DEBUG or INFO.
+
+**Level Usage Examples:**
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+# DEBUG: Detailed info for diagnosing issues
+logger.debug("User login attempt with ID: 12345")
+logger.debug("Database query took 0.5 seconds")
+
+# INFO: Confirmations that things are working
+logger.info("Application started successfully")
+logger.info("Processing batch of 100 records")
+
+# WARNING: Something unexpected but not critical
+logger.warning("Configuration file not found, using defaults")
+logger.warning("Memory usage above 80%")
+
+# ERROR: A serious problem occurred
+logger.error("Failed to connect to database")
+logger.error("Invalid user credentials provided")
+
+# CRITICAL: Very serious, program may not continue
+logger.critical("Disk is full - cannot write data")
+logger.critical("Fatal configuration error detected")
+```
+
+---
+
+#### Logging Exceptions
+
+When an error occurs in an `except` block, you should use **`logger.exception()`** to automatically capture the full traceback. This provides crucial context for debugging.
+
+`logger.exception()` is equivalent to `logger.error()` but automatically appends the current exception traceback to the log message.
 
 **✗ Bad:**
 ```python
-print("Starting processing.")   # No levels, no timestamps, hard to redirect
-print("Something went wrong!")
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    result = int(user_input)
+except ValueError:
+    logger.error("Conversion failed")  # No traceback info
 ```
-
-### Log levels (brief)
-
-| Level   | Typical use                          |
-|---------|--------------------------------------|
-| DEBUG   | Detailed diagnostic information      |
-| INFO    | General progress or key events       |
-| WARNING | Something unexpected but not fatal   |
-| ERROR   | A failure that affects the operation |
-
-### Logging exceptions
-
-Use `logger.exception()` in an except block to automatically include the traceback.
 
 **✓ Good:**
 ```python
+import logging
+
+logger = logging.getLogger(__name__)
+
 try:
-    risky_operation()
-except OSError as e:
-    logger.exception("Operation failed: %s", e)
+    result = int(user_input)
+except ValueError:
+    logger.exception("Failed to convert user input")  # Includes full traceback
+```
+
+**Output comparison:**
+
+Bad output:
+```
+ERROR:__main__:Conversion failed
+```
+
+Good output:
+```
+ERROR:__main__:Failed to convert user input
+Traceback (most recent call last):
+  File "script.py", line 5, in <module>
+    result = int(user_input)
+ValueError: invalid literal for int() with base 10: 'abc'
+```
+
+---
+
+#### Configuring Logging
+
+You can configure logging at the start of your program to control output format, level, and destination:
+
+```python
+import logging
+
+# Basic configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("app.log"),      # Write to file
+        logging.StreamHandler()              # Also write to console
+    ]
+)
+
+logger = logging.getLogger(__name__)
+```
+
+The **format** string can include various fields:
+- `%(asctime)s` - Timestamp
+- `%(name)s` - Logger name (usually `__name__`)
+- `%(levelname)s` - Log level (DEBUG, INFO, WARNING, etc.)
+- `%(message)s` - The log message
+- `%(filename)s` - Source filename
+- `%(funcName)s` - Function name
+- `%(lineno)d` - Line number
+
+---
+
+#### Best Practices for Logging
+
+1. **Use appropriate levels** - Don't log everything as ERROR; use DEBUG/INFO for normal operations
+2. **Use `logger.exception()` in except blocks** - Captures the full traceback for debugging
+3. **Include context** - Log relevant variables and state to help diagnose issues
+4. **Avoid logging sensitive data** - Don't log passwords, tokens, or personal information
+5. **Use named loggers** - Always use `logger = logging.getLogger(__name__)`
+6. **Configure at program start** - Set up logging once in your main entry point
+
+**Example:**
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def process_user(user_id):
+    logger.info(f"Processing user: {user_id}")
+    try:
+        user_data = fetch_user(user_id)
+        logger.debug(f"Retrieved user data: {user_data}")
+        save_to_database(user_data)
+        logger.info(f"User {user_id} processed successfully")
+    except ConnectionError as e:
+        logger.exception(f"Failed to fetch user {user_id}")
+        raise
+    except ValueError as e:
+        logger.warning(f"Invalid user data for user {user_id}: {e}")
+        return None
 ```
 
 ---
@@ -263,6 +405,8 @@ except OSError as e:
 ## Summary
 
 - **Error handling**: Use `try`/`except` to catch specific exceptions, raise exceptions when your code detects invalid state, and use `finally` (and optionally `else`) for cleanup and follow‑up logic.
-- **Logging**: Use the `logging` module with appropriate levels (INFO, WARNING, ERROR) instead of `print` for operational messages, and use `logger.exception()` when logging inside an except block.
+- **Logging levels**: Use DEBUG for detailed diagnostics, INFO for general progress, WARNING for unexpected situations, and ERROR/CRITICAL for failures.
+- **Logging exceptions**: Use `logger.exception()` in except blocks to automatically capture the full traceback for debugging.
+- **Logging configuration**: Configure logging once at program start to control format, level, and output destination.
 
 Together, error handling and logging make your programs easier to run, debug, and maintain.
