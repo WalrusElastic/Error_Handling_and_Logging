@@ -3,22 +3,20 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Error Handling](#error-handling)
-   - [Why handle errors?](#why-handle-errors)
+   - [Introduction to Error Handling](#introduction-to-error-handling)
    - [Error Handling in Python](#error-handling-in-python)
-   - [Catching Specific Exceptions](#catching-specific-exceptions)
+   - [Error Handling Best Practices](#error-handling-best-practices)
    - [Exception Hierarchy](#the-exception-hierarchy)
    - [Raising Exceptions](#raising-exceptions)
    - [Exception Propagation](#exception-propagation)
    - [Error Handling Best Practices](#error-handling-best-practices)
-3. [Introduction to Logging](#introduction-to-logging)
-   - [Why use logging?](#why-use-logging)
+   - [Error Handling Practce](#error-handling-practice)
+3. [Logging](#logging)
    - [Logging in Python](#logging-in-python)
-   - [Basic Usage](#basic-usage)
-   - [Logging Levels](#logging-levels)
-   - [Logging Exceptions](#logging-exceptions)
-   - [Configuring Logging](#configuring-logging)
-   - [Best Practices](#best-practices-for-logging)
-4. [Summary](#summary)
+   - [Logging Best Practices](#logging-best-practices)
+   - [Logging Practice](#logging-practice)
+4. [Error Handling and Logging Practice](#error-handling-and-logging-practice)
+5. [Summary](#summary)
 
 ---
 
@@ -45,7 +43,7 @@ In this folder, you should find the video **Error_Handling_Introduction**. Watch
 
 ---
 
-### Why handle errors?
+#### Why handle errors?
 
 Errors are unavoidable in programs. Although we employ defensive programming to mitigate them, bad inputs, missing resources and unexpected states will occur in real systems. Without proper error handling, even minor issues can cause unpredictable behaviour.
 
@@ -230,7 +228,7 @@ To write robust, maintainable code, follow these key principles when handling er
 
 ---
 
-### Error Handling practice
+### Error Handling Practice
 
 In the `Practices` folder, you will find the Python file **`Error_Handling_Practice.py`**, contains several exercises on implementing error handling.
 
@@ -242,7 +240,7 @@ In the `Practices` folder, you will find the Python file **`Error_Handling_Pract
 
 Logging is the practice of writing structured messages about what your program is doing. Unlike ad‑hoc `print` statements, logging can be sent to files, filtered by severity, and controlled from one place (e.g. the logging module configuration).
 
-### Why use logging?
+#### Why use logging?
 
 - **Levels**: Use DEBUG, INFO, WARNING, ERROR to indicate the type of information produced by the script
 - **Persistence**: Write to a file for later inspection or auditing
@@ -388,7 +386,7 @@ The **format** string can include various fields:
 
 ---
 
-#### Best Practices for Logging
+### Logging Best Practices
 
 1. **Use named loggers** - Always use `logger = logging.getLogger(__name__)`
 2. **Configure at program start** - Set up logging once in your main entry point
@@ -399,7 +397,7 @@ The **format** string can include various fields:
 
 ---
 
-### Logging Handling practice
+### Logging Practice
 
 In the `Practices` folder, you will find the Python file **`Logging_Practice.py`**, contains several exercises on implementing logging.
 
