@@ -3,7 +3,21 @@
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Error Handling](#error-handling)
+   - [Why handle errors?](#why-handle-errors)
+   - [Error Handling in Python](#error-handling-in-python)
+   - [Catching Specific Exceptions](#catching-specific-exceptions)
+   - [Exception Hierarchy](#the-exception-hierarchy)
+   - [Raising Exceptions](#raising-exceptions)
+   - [Exception Propagation](#exception-propagation)
+   - [Error Handling Best Practices](#error-handling-best-practices)
 3. [Introduction to Logging](#introduction-to-logging)
+   - [Why use logging?](#why-use-logging)
+   - [Logging in Python](#logging-in-python)
+   - [Basic Usage](#basic-usage)
+   - [Logging Levels](#logging-levels)
+   - [Logging Exceptions](#logging-exceptions)
+   - [Configuring Logging](#configuring-logging)
+   - [Best Practices](#best-practices-for-logging)
 4. [Summary](#summary)
 
 ---
@@ -205,13 +219,32 @@ Here:
 
 ---
 
-## Introduction to Logging
+### Error Handling Best Practices
+
+To write robust, maintainable code, follow these key principles when handling errors:
+
+1. **Catch Specific Exceptions** - Catch exceptions specifically, to prevent masking unexpected errors
+2. **Raise Meaningful Messages** - Provide clear context to aid in debugging
+3. **Fail Fast and Loudly** - Catch invalid states early to simplify debugging
+4. **Use `finally` for Cleanup** - Ensure graceful shutdown if exceptions occur
+
+---
+
+### Error Handling practice
+
+In the `Practices` folder, you will find the Python file **`Error_Handling_Practice.py`**, contains several exercises on implementing error handling.
+
+**Your task**: Refactor each section to utilise error handling accordingly. 
+
+---
+
+## Logging
 
 Logging is the practice of writing structured messages about what your program is doing. Unlike ad‑hoc `print` statements, logging can be sent to files, filtered by severity, and controlled from one place (e.g. the logging module configuration).
 
 ### Why use logging?
 
-- **Levels**: Use DEBUG, INFO, WARNING, ERROR so you can turn detail up or down without changing code
+- **Levels**: Use DEBUG, INFO, WARNING, ERROR to indicate the type of information produced by the script
 - **Persistence**: Write to a file for later inspection or auditing
 - **Context**: Include timestamps, module names, and severity automatically
 
@@ -227,6 +260,8 @@ In this folder, you will find the video `Logging_in_Python.mp4`. Watch it for an
 
 Logging is implemented using Python's standard library `logging` module. Instead of using `print()` statements, you use logging functions to record events at different severity levels.
 
+To use it, the `logging` module must first be imported, and basicConfig() must be called as per below
+
 **✗ Bad (using print):**
 ```python
 print("Starting processing.")   # No levels, no timestamps, hard to redirect
@@ -235,12 +270,11 @@ print("Something went wrong!")
 
 **✓ Good (using logging):**
 ```python
-import logging
+import logging # importing logging module
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO) # sets minimum level at which information will be logged
 
-logger.info("Starting processing.")
+logger.info("Starting processing.") # logs information at different levels
 logger.error("Something went wrong!")
 ```
 
@@ -302,6 +336,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+user_input = "p"
 try:
     result = int(user_input)
 except ValueError:
@@ -314,28 +349,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+user_input = "p"
 try:
     result = int(user_input)
 except ValueError:
     logger.exception("Failed to convert user input")  # Includes full traceback
 ```
-
-**Output comparison:**
-
-Bad output:
-```
-ERROR:__main__:Conversion failed
-```
-
-Good output:
-```
-ERROR:__main__:Failed to convert user input
-Traceback (most recent call last):
-  File "script.py", line 5, in <module>
-    result = int(user_input)
-ValueError: invalid literal for int() with base 10: 'abc'
-```
-
 ---
 
 #### Configuring Logging
@@ -348,14 +367,14 @@ import logging
 # Basic configuration
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', # Format of the log messages
     handlers=[
         logging.FileHandler("app.log"),      # Write to file
         logging.StreamHandler()              # Also write to console
     ]
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # Creates/ Loads a specific logger instance for this file
 ```
 
 The **format** string can include various fields:
@@ -371,42 +390,50 @@ The **format** string can include various fields:
 
 #### Best Practices for Logging
 
-1. **Use appropriate levels** - Don't log everything as ERROR; use DEBUG/INFO for normal operations
-2. **Use `logger.exception()` in except blocks** - Captures the full traceback for debugging
-3. **Include context** - Log relevant variables and state to help diagnose issues
-4. **Avoid logging sensitive data** - Don't log passwords, tokens, or personal information
-5. **Use named loggers** - Always use `logger = logging.getLogger(__name__)`
-6. **Configure at program start** - Set up logging once in your main entry point
+1. **Use named loggers** - Always use `logger = logging.getLogger(__name__)`
+2. **Configure at program start** - Set up logging once in your main entry point
+3. **Use appropriate levels** - Don't log everything as ERROR; use DEBUG/INFO for normal operations
+4. **Use `logger.exception()` in except blocks** - Captures the full traceback for debugging
+5. **Include context** - Log relevant variables and state to help diagnose issues
 
-**Example:**
-```python
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-def process_user(user_id):
-    logger.info(f"Processing user: {user_id}")
-    try:
-        user_data = fetch_user(user_id)
-        logger.debug(f"Retrieved user data: {user_data}")
-        save_to_database(user_data)
-        logger.info(f"User {user_id} processed successfully")
-    except ConnectionError as e:
-        logger.exception(f"Failed to fetch user {user_id}")
-        raise
-    except ValueError as e:
-        logger.warning(f"Invalid user data for user {user_id}: {e}")
-        return None
-```
 
 ---
 
+### Logging Handling practice
+
+In the `Practices` folder, you will find the Python file **`Logging_Practice.py`**, contains several exercises on implementing logging.
+
+**Your task**: Refactor each section to utilise logging accordingly. 
+
+---
+
+## Error Handling and Logging Practice
+
+In the `Practices` folder, you will find the Python file **`Final_Exercise.py`**, containing a script as robust as a house of cards, writen by your master trainer 3SG Master_B8. 
+
+**Your task**: Refactor the script. Good Luck.
+
 ## Summary
 
-- **Error handling**: Use `try`/`except` to catch specific exceptions, raise exceptions when your code detects invalid state, and use `finally` (and optionally `else`) for cleanup and follow‑up logic.
-- **Logging levels**: Use DEBUG for detailed diagnostics, INFO for general progress, WARNING for unexpected situations, and ERROR/CRITICAL for failures.
-- **Logging exceptions**: Use `logger.exception()` in except blocks to automatically capture the full traceback for debugging.
-- **Logging configuration**: Configure logging once at program start to control format, level, and output destination.
+Error handling and logging are complementary tools:
 
-Together, error handling and logging make your programs easier to run, debug, and maintain.
+- **Error handling** decides how the program responds to errors (continue, retry, exit gracefully)
+- **Logging** records what happened so you can investigate and debug issues later
+
+A complete error handling strategy includes logging:
+
+```python
+try:
+    risky_operation()
+except SpecificException as e:
+    logger.exception("Risky operation failed:")  # Logs the traceback
+    # Handle the error gracefully
+except AnotherException as e:
+    logger.error(f"Unexpected error: {e}")
+    raise  # Re-raise if you can't handle it
+finally:
+    cleanup()  # Always cleanup
+```
+
+
+Together, error handling and logging make your programs **robust, maintainable, and easier to debug**. Use them consistently throughout your codebase to build production-quality Python applications.

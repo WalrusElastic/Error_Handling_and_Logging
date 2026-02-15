@@ -2,8 +2,6 @@
 # Complete each exercise by implementing the functions according to the requirements.
 # Refer to Error_Handling_and_Logging.md for concepts and best practices.
 
-import logging
-import json
 from typing import Any, List, Union
 
 # Exercise 1: Basic try/except
