@@ -6,17 +6,13 @@
    - [Introduction to Error Handling](#introduction-to-error-handling)
    - [Error Handling in Python](#error-handling-in-python)
    - [Error Handling Best Practices](#error-handling-best-practices)
-   - [Exception Hierarchy](#the-exception-hierarchy)
-   - [Raising Exceptions](#raising-exceptions)
-   - [Exception Propagation](#exception-propagation)
-   - [Error Handling Best Practices](#error-handling-best-practices)
-   - [Error Handling Practce](#error-handling-practice)
+   - [Error Handling Practice](#error-handling-practice)
 3. [Logging](#logging)
+   - [Why use logging?](#why-use-logging)
    - [Logging in Python](#logging-in-python)
    - [Logging Best Practices](#logging-best-practices)
    - [Logging Practice](#logging-practice)
-4. [Error Handling and Logging Practice](#error-handling-and-logging-practice)
-5. [Summary](#summary)
+4. [Summary](#summary)
 
 ---
 
@@ -77,20 +73,53 @@ The `finally` block contains code that always runs, regardless of whether an err
 
 **✗ Bad:**
 ```python
-# No handling—program crashes with a long traceback if file is missing
-f = open("data.txt")
+# No handling—program crashes if division by zero occurs
+result = 10 / 0
+print(f"Result: {result}")
 ```
 
 **✓ Good:**
 ```python
 try:
+    result = 10 / 0
+    print(f"Result: {result}")
+except Exception:  # Handles an error
+    print("Cannot divide by zero.")
+    result = None
+finally:  # Executes regardless of whether an error occurred
+    print("Calculation complete.")
+```
+
+---
+
+#### with
+
+While `try`/`except`/`finally` is useful for general error handling, Python provides a cleaner alternative for managing files: `with`. Using `try`/`except`/`finally` to open files means closing the respective file in the `finally` statement, to prevent possible errors.
+
+The `with` statement solves this automatically. It makes sure cleanup always happens — even if an error occurs, making it especially useful for file handling.
+
+**✗ Using try/except/finally**
+```python
+f = None
+try:
     f = open("data.txt")
-except FileNotFoundError:  # Handles specifically the FileNotFound error
+    data = f.read()
+    process(data)
+except FileNotFoundError:
     print("File not found.")
-finally:  # Executes regardless of whether an error was found
-    print("Execution complete.")
-    if 'f' in dir() and not f.closed:
-        f.close()
+finally:
+    if f is not None and not f.closed:
+        f.close()  # Easy to forget cleanup!
+```
+
+**✓ Using with**
+```python
+try:
+    with open("data.txt") as f: # if an error happens in this step, it automatically closes the file
+        data = f.read()
+        process(data)
+except FileNotFoundError:
+    print("File not found.") # to log the error
 ```
 
 ---
@@ -171,16 +200,55 @@ def load_dataset(path):
 
 #### Exception Propagation
 
-When an exception is raised in Python, it does not have to be handled immediately. If the current block of code does not catch the exception, it is automatically passed upward through the call stack. This process is known as **exception propagation**.
+To understand how exceptions propagate accross nested functions, it is important to have some understanding of the cal stack
 
-Propagation allows lower-level functions to signal failures, while higher-level code — which has more context about the overall program — can then decide whether to recover, retry, log, or terminate safely.
+---
 
-##### How Propagation Works
+##### Call stack
+When a Python program runs, it keeps track of which function is currently running using something called the call stack.
+
+You can think of it like a stack of plates:
+- The latest function called goes on top
+- When a function finishes, it is removed from the stack
+- The program always runs the function on the top
+
+**Example:**
+
+```python
+def level3():
+    print("Level 3 running")
+
+def level2():
+    level3()
+
+def level1():
+    level2()
+
+level1()
+```
+
+In the above script, the call order is as follows: `level1()` → `level2()` → `level3()`
+
+As such, the call stack when the function is running, will look like this
+
+```
+level3   ← currently running
+level2
+level1
+main
+```
+when the function has just called level3. When it is complete, it is removed from the stack, leaving level2 etc
+
+---
+
+##### Call stack and Error Propagation in nested functions
+When an exception is raised in Python, it does not have to be handled immediately. If the current block of code does not catch the exception, it is automatically passed through the call stack, to the function that encompasses this erroring function. This process is known as **exception propagation**.
+
 
 When an error occurs:
 
-1. Python checks the current `try/except` block for a matching handler.
-2. If none exists, the exception moves up one level to the caller.
+1. Python checks the current `try/except` block for a matching handler (matching try except for the given error).
+2. If none exists, the exception moves one level through the caller.
 3. This continues until:
    - A matching handler is found, or
    - The program terminates with a traceback
@@ -215,6 +283,8 @@ Here:
 - It propagates through `process`
 - It reaches the outer `try/except`, where it is caught and handled
 
+Propagation allows lower-level functions to signal failures, while higher-level code — which has more context about the overall program — can then decide whether to recover, retry, log, or terminate safely.
+
 ---
 
 ### Error Handling Best Practices
@@ -224,7 +294,8 @@ To write robust, maintainable code, follow these key principles when handling er
 1. **Catch Specific Exceptions** - Catch exceptions specifically, to prevent masking unexpected errors
 2. **Raise Meaningful Messages** - Provide clear context to aid in debugging
 3. **Fail Fast and Loudly** - Catch invalid states early to simplify debugging
-4. **Use `finally` for Cleanup** - Ensure graceful shutdown if exceptions occur
+4. **Use `finally` for General Cleanup** - Ensure graceful shutdown if exceptions occur
+5. **USe `with` when opening fies** - Automatically ensures graceful shutdown when opening files
 
 ---
 
@@ -270,6 +341,8 @@ print("Something went wrong!")
 ```python
 import logging # importing logging module
 
+logger = logging.getLogger(__name__) # Instantiate logger object
+
 logging.basicConfig(level=logging.INFO) # sets minimum level at which information will be logged
 
 logger.info("Starting processing.") # logs information at different levels
@@ -298,6 +371,8 @@ When you set a logging level, all messages at that level and above are recorded.
 import logging
 
 logger = logging.getLogger(__name__)
+
+logging.basicConfig(level=logging.INFO)
 
 # DEBUG: Detailed info for diagnosing issues
 logger.debug("User login attempt with ID: 12345")
